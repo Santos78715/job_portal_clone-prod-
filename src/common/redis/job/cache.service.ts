@@ -14,7 +14,7 @@ export class RedisService {
   ): Promise<void> {
     try {
       if (expireTimeInSeconds) {
-        await this.redisClient.set(key, value, 'EX', expireTimeInSeconds);
+        await this.redisClient.setEx(key, value, expireTimeInSeconds);
       } else {
         await this.redisClient.set(key, value);
       }

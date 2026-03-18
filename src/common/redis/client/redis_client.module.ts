@@ -7,4 +7,3 @@ import { RedisClient } from './client.redis';
   exports: [RedisClient],
 })
 export class RedisClientModule {}
-

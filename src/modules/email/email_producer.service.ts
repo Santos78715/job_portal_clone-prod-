@@ -5,12 +5,15 @@ import { EmailQueue } from 'src/libs/queue/queue.service';
 export class EmailProducerService {
   constructor(private emailQueue: EmailQueue) {}
 
-  async sendApplicationEmail(user: {
-    id: number;
-    email: string;
-    firstname?: string;
-    lastname?: string;
-  }, applicationId?: number) {
+  async sendApplicationEmail(
+    user: {
+      id: number;
+      email: string;
+      firstname?: string;
+      lastname?: string;
+    },
+    applicationId?: number,
+  ) {
     const displayName =
       [user.firstname, user.lastname].filter(Boolean).join(' ') || user.email;
 

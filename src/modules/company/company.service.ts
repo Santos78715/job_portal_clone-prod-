@@ -114,7 +114,7 @@ export class CompanyService {
         id: company.id,
         data: company,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException("Couldn't register a company !");
     }
   }
@@ -156,8 +156,10 @@ export class CompanyService {
         id: updateCompany.id,
         data: updateCompany,
       };
-    } catch (error) {
-      throw new BadRequestException("Couldn't update company. Please try again.");
+    } catch {
+      throw new BadRequestException(
+        "Couldn't update company. Please try again.",
+      );
     }
   }
 
@@ -181,7 +183,7 @@ export class CompanyService {
         id: deleteCompany.id,
         data: deleteCompany,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException(
         "Couldn't delete a company! Please try again..",
       );

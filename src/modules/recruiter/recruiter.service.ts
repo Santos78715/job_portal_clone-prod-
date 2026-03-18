@@ -4,7 +4,8 @@ import { UpdateRecruiterDto } from './dto/update-recruiter.dto';
 
 @Injectable()
 export class RecruiterService {
-  create(createRecruiterDto: CreateRecruiterDto) {
+  create(_createRecruiterDto: CreateRecruiterDto) {
+    void _createRecruiterDto;
     return 'This action adds a new recruiter';
   }
 
@@ -16,7 +17,8 @@ export class RecruiterService {
     return `This action returns a #${id} recruiter`;
   }
 
-  update(id: number, updateRecruiterDto: UpdateRecruiterDto) {
+  update(id: number, _updateRecruiterDto: UpdateRecruiterDto) {
+    void _updateRecruiterDto;
     return `This action updates a #${id} recruiter`;
   }
 

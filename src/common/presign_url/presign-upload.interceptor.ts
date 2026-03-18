@@ -51,7 +51,8 @@ export class PresignUploadInterceptor implements NestInterceptor {
 
     const fileName = fileNameRaw;
     const mimeType = mimeTypeRaw;
-    const sizeBytes = typeof sizeBytesRaw === 'number' ? sizeBytesRaw : Number(sizeBytesRaw);
+    const sizeBytes =
+      typeof sizeBytesRaw === 'number' ? sizeBytesRaw : Number(sizeBytesRaw);
 
     if (!fileName || fileName.length > 200) {
       throw new BadRequestException('Invalid fileName');

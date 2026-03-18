@@ -16,4 +16,3 @@ export class PresignUploadDto {
   @Max(50 * 1024 * 1024) // 50MB hard cap at API level
   sizeBytes: number;
 }
-

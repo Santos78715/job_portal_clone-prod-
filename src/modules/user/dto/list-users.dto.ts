@@ -1,6 +1,14 @@
 import { Role } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsEnum, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class ListUsersDto {
   @Type(() => Number)
@@ -39,4 +47,3 @@ export class ListUsersDto {
   @IsOptional()
   sortOrder?: 'asc' | 'desc' = 'desc';
 }
-

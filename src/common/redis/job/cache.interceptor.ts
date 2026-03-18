@@ -7,7 +7,7 @@ import { CACHE_KEY } from './cache.decorator';
 import { of, tap } from 'rxjs';
 
 type CacheMeta = {
-  keyBuilder: (req: any) => string;
+  keyBuilder: (req: unknown) => string;
   ttl: number;
 };
 
@@ -23,7 +23,7 @@ export class CacheInterceptor implements NestInterceptor {
 
     if (!meta) return next.handle();
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<unknown>();
 
     const cacheKey = meta.keyBuilder(request);
     const ttl = meta.ttl ?? 60;

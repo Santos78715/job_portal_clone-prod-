@@ -17,9 +17,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login.dto';
 import type { Request, Response } from 'express';
 import { RateLimitGuard } from 'src/common/rate_limit/rate_limit.guard';
-import { CloudinaryService } from 'src/utils/cloudinary';
-import { UseInterceptors, UploadedFile } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -36,9 +33,6 @@ type RequestWithCookies = Request & {
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private ratelimitGuard: RateLimitGuard,
-    private cloudinaryService: CloudinaryService,
-
     private awsService: AWSS3Service,
   ) {}
 
@@ -102,7 +96,7 @@ export class UserController {
 
   @Post('/upload/url')
   async uploadImage() {
-    let bucketName = process.env.AWS_USER_BUCKET_NAME;
+    const bucketName = process.env.AWS_USER_BUCKET_NAME;
     const url = await this.awsService.getPresignedUrl(
       bucketName!,
       'users/125/resume.pdf',

@@ -13,6 +13,10 @@ type RequestWithUser = Request & {
   user?: { role?: Role };
 };
 
+function isRole(value: unknown): value is Role {
+  return Object.values(Role).includes(value as Role);
+}
+
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -27,12 +31,15 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<RequestWithUser>();
-    const userRole = request.user?.role;
-    if (!userRole) {
+    const req = context.switchToHttp().getRequest<unknown>();
+    if (!req || typeof req !== 'object') return false;
+    const request = req as RequestWithUser;
+
+    const userRoleRaw = request.user?.role;
+    if (!isRole(userRoleRaw)) {
       return false;
     }
-    const hasRole = requiredRoles.includes(userRole);
+    const hasRole = requiredRoles.includes(userRoleRaw);
 
     if (!hasRole) {
       throw new ForbiddenException(

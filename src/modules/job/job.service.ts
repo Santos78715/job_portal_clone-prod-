@@ -96,16 +96,25 @@ export class JobService {
     ] as const;
     const allowedSortOrder = ['asc', 'desc'] as const;
 
-    const sortBy = allowedSortBy.includes(query.sortBy as any)
-      ? (query.sortBy as (typeof allowedSortBy)[number])
-      : 'createdAt';
-    const sortOrder = allowedSortOrder.includes(query.sortOrder as any)
-      ? (query.sortOrder as (typeof allowedSortOrder)[number])
-      : 'desc';
+    const sortByRaw = query.sortBy;
+    const sortBy =
+      typeof sortByRaw === 'string' &&
+      (allowedSortBy as readonly string[]).includes(sortByRaw)
+        ? sortByRaw
+        : 'createdAt';
 
+    const sortOrderRaw = query.sortOrder;
+    const sortOrder =
+      typeof sortOrderRaw === 'string' &&
+      (allowedSortOrder as readonly string[]).includes(sortOrderRaw)
+        ? sortOrderRaw
+        : 'desc';
+
+    const jobTypeRaw = query.jobType;
     const jobType =
-      query.jobType && Object.values(JobType).includes(query.jobType as any)
-        ? (query.jobType as JobType)
+      typeof jobTypeRaw === 'string' &&
+      (Object.values(JobType) as string[]).includes(jobTypeRaw)
+        ? jobTypeRaw
         : undefined;
 
     const normalizedForKey = CacheKeys.normalizeJobsListParams({
@@ -129,9 +138,9 @@ export class JobService {
     const cached = await this.redisService.get(cacheKey);
     if (cached) {
       try {
-        return JSON.parse(cached);
+        return JSON.parse(cached) as Record<string, unknown>;
       } catch {
-        return cached as unknown;
+        await this.redisService.del(cacheKey);
       }
     }
 

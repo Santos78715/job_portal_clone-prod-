@@ -26,8 +26,12 @@ export class RedisClient {
     return this.client.get(key);
   }
 
-  set(key: string, value: string, ...args: any[]) {
-    return (this.client.set as any)(key, value, ...args);
+  set(key: string, value: string) {
+    return this.client.set(key, value);
+  }
+
+  setEx(key: string, value: string, expireTimeInSeconds: number) {
+    return this.client.set(key, value, 'EX', expireTimeInSeconds);
   }
 
   del(key: string) {

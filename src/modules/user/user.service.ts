@@ -1,7 +1,6 @@
 import {
   Injectable,
   UnauthorizedException,
-  BadRequestException,
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -13,7 +12,6 @@ import { LoginUserDto } from './dto/login.dto';
 import { Token } from 'src/utils/token';
 import { RedisService } from 'src/common/redis/job/cache.service';
 import type { Request, Response } from 'express';
-import { CloudinaryService } from 'src/utils/cloudinary';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserCacheKeys } from 'src/common/redis/user/cache_keys.redis';
 import { ListUsersDto } from './dto/list-users.dto';
@@ -57,9 +55,9 @@ export class UserService {
     const cached = await this.redisService.get(cacheKey);
     if (cached) {
       try {
-        return JSON.parse(cached);
+        return JSON.parse(cached) as Record<string, unknown>;
       } catch {
-        return cached as unknown;
+        await this.redisService.del(cacheKey);
       }
     }
 
@@ -71,12 +69,19 @@ export class UserService {
       'lastname',
     ] as const;
     const allowedSortOrder = ['asc', 'desc'] as const;
-    const sortBy = allowedSortBy.includes(query.sortBy as any)
-      ? (query.sortBy as (typeof allowedSortBy)[number])
-      : 'createdAt';
-    const sortOrder = allowedSortOrder.includes(query.sortOrder as any)
-      ? (query.sortOrder as (typeof allowedSortOrder)[number])
-      : 'desc';
+    const sortByRaw = query.sortBy;
+    const sortBy =
+      typeof sortByRaw === 'string' &&
+      (allowedSortBy as readonly string[]).includes(sortByRaw)
+        ? sortByRaw
+        : 'createdAt';
+
+    const sortOrderRaw = query.sortOrder;
+    const sortOrder =
+      typeof sortOrderRaw === 'string' &&
+      (allowedSortOrder as readonly string[]).includes(sortOrderRaw)
+        ? sortOrderRaw
+        : 'desc';
 
     const where = {
       ...(query.role ? { role: query.role } : {}),

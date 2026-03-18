@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
+import type { Express } from 'express';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,19 +12,30 @@ cloudinary.config({
 export class CloudinaryService {
   constructor() {}
 
-  async uploadFile(file: any) {
-    let upload = new Promise((resolve, reject) => {
-      const upload = cloudinary.uploader.upload_stream(
+  async uploadFile(file: Express.Multer.File) {
+    const upload = new Promise<unknown>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
         {
           resource_type: 'auto',
         },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) {
+            const message =
+              error instanceof Error
+                ? error.message
+                : typeof error === 'string'
+                  ? error
+                  : 'Upload failed';
+            const errObj: Error =
+              error instanceof Error ? error : new Error(message);
+            reject(errObj);
+            return;
+          }
           resolve(result);
         },
       );
 
-      upload.end(file.buffer);
+      stream.end(file.buffer);
     });
     return upload;
   }

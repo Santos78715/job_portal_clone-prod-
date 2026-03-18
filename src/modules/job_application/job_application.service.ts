@@ -105,7 +105,9 @@ export class JobApplicationService {
     const isAdmin = requesterRole === Role.ADMIN;
     const isOwnerRecruiter = job.userId === requesterId;
     if (!isAdmin && !isOwnerRecruiter) {
-      throw new ForbiddenException('Not allowed to view applications for this job');
+      throw new ForbiddenException(
+        'Not allowed to view applications for this job',
+      );
     }
 
     const applications = await this.prisma.jobApplication.findMany({

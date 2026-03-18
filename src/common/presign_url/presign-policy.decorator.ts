@@ -11,4 +11,3 @@ export type PresignPolicy = {
 
 export const PresignPolicy = (policy: PresignPolicy) =>
   SetMetadata(PRESIGN_POLICY_KEY, policy);
-

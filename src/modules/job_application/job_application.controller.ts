@@ -23,9 +23,7 @@ type RequestWithUser = Request & { user?: { sub?: number; role?: Role } };
 
 @Controller('job-application')
 export class JobApplicationController {
-  constructor(
-    private readonly jobApplicationService: JobApplicationService,
-  ) {}
+  constructor(private readonly jobApplicationService: JobApplicationService) {}
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.CANDIDATE)
