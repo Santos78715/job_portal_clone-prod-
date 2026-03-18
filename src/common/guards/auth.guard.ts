@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import type { Request } from 'express';
-import { RedisService } from 'src/common/redis/redis.service';
+import { RedisService } from 'src/common/redis/job/cache.service';
 import { Token } from 'src/utils/token';
 
 type RequestWithCookies = Request & {

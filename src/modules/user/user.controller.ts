@@ -1,4 +1,17 @@
-import { Controller, Post, Body, Res, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Res,
+  Req,
+  UseGuards,
+  Patch,
+  Param,
+  ParseIntPipe,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login.dto';
@@ -7,6 +20,13 @@ import { RateLimitGuard } from 'src/common/rate_limit/rate_limit.guard';
 import { CloudinaryService } from 'src/utils/cloudinary';
 import { UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ListUsersDto } from './dto/list-users.dto';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RoleGuard } from 'src/common/guards/role.guard';
+import { Roles } from 'src/common/decorators/admin.decorator';
+import { Role } from '@prisma/client';
+import { AWSS3Service } from 'src/common/presign_url/s3-storage.service';
 
 type RequestWithCookies = Request & {
   cookies: Record<string, string | undefined>;
@@ -18,7 +38,30 @@ export class UserController {
     private readonly userService: UserService,
     private ratelimitGuard: RateLimitGuard,
     private cloudinaryService: CloudinaryService,
+
+    private awsService: AWSS3Service,
   ) {}
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  @Get()
+  listUsers(@Query() query: ListUsersDto) {
+    return this.userService.findAll(query);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  @Get(':id')
+  getUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOne(id);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  @Delete(':id')
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.remove(id);
+  }
 
   @Post('/register')
   registerUser(@Body() createUserDto: CreateUserDto) {
@@ -32,6 +75,13 @@ export class UserController {
     @Res({ passthrough: true }) response: Response,
   ) {
     return this.userService.loginUser(loginUserDto, response);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  @Patch('/update')
+  updateUser(@Body() updateUser: UpdateUserDto) {
+    return this.userService.updateUser(updateUser);
   }
 
   @Post('/refresh')
@@ -50,10 +100,13 @@ export class UserController {
     return this.userService.logOut(req, res);
   }
 
-  @UseInterceptors(FileInterceptor('file'))
-  @Post('/upload')
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    let upload = await this.cloudinaryService.uploadFile(file);
-    return upload;
+  @Post('/upload/url')
+  async uploadImage() {
+    let bucketName = process.env.AWS_USER_BUCKET_NAME;
+    const url = await this.awsService.getPresignedUrl(
+      bucketName!,
+      'users/125/resume.pdf',
+    );
+    return url;
   }
 }

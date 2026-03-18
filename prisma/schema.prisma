@@ -7,33 +7,153 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role{
+enum Role {
   ADMIN
   CANDIDATE
   RECRUITER
 }
 
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  TEMPORARY
+  FREELANCE
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum UploadStatus {
+  PRESIGNED
+  UPLOADED
+  CANCELLED
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  firstname      String
-  lastname    String
-  password String
-  role Role @default(CANDIDATE)
-  phone String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  skill Skill[]
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  firstname    String
+  lastname     String
+  password     String
+  role         Role      @default(CANDIDATE)
+  phone        String?
+  profileImage String?
+  description  String?
+  bio          String?
+  companyId    Int?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  job          Job[]
+  applications JobApplication[]
+  uploads      FileUpload[]
+  userSkills   UserSkills[]
+  education    Education[]
+  experience   Experience[]
+  company      Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
-Model Candidate{
-  id Int @id @default(autoincrement)
-
+model Experience {
+  id          Int      @id @default(autoincrement())
+  experience  String
+  userId      Int
+  startedAt   DateTime?
+  endedAt     DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-Model Skill{
-  id Int @id @default(autoincrement())
-  name String
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
+model Education {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  name        String
+  startedAt   DateTime
+  completedAt DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id         Int          @id @default(autoincrement())
+  name       String
+  userSkills UserSkills[]
+}
+
+model Company {
+  id           Int    @id @default(autoincrement())
+  name         String
+  registrationId String @unique
+  totalEmployee Int
+  job          Job[]
+  users        User[]
+}
+
+model UserSkills {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  skillId Int
+
+  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId]) // prevents duplicates
+}
+
+model Job {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  location    String?
+  salary      Int?
+  jobType     JobType
+  isActive    Boolean  @default(true)
+  companyId   Int
+  userId      Int       // recruiter or job creator
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id         Int               @id @default(autoincrement())
+  jobId      Int
+  applicantId Int
+  resumeUrl  String
+  status     ApplicationStatus @default(PENDING)
+
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  job        Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicant  User              @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, applicantId])
+}
+
+model FileUpload {
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  bucket       String
+  key          String
+  url          String
+  mimeType     String
+  sizeBytes    Int
+  originalName String
+  status       UploadStatus @default(PRESIGNED)
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@unique([bucket, key])
 }

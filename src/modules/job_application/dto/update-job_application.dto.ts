@@ -1,6 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateJobApplicationDto } from './create-job_application.dto';
+import { ApplicationStatus } from '@prisma/client';
+import { IsEnum } from 'class-validator';
 
-export class UpdateJobApplicationDto extends PartialType(
-  CreateJobApplicationDto,
-) {}
+export class UpdateJobApplicationDto {
+  @IsEnum(ApplicationStatus)
+  status: ApplicationStatus;
+}
