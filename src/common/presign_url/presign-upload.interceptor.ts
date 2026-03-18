@@ -38,9 +38,20 @@ export class PresignUploadInterceptor implements NestInterceptor {
     const userId = req.user?.sub;
     if (!userId) throw new UnauthorizedException('Missing user context');
 
-    const fileName = String(req.body?.fileName ?? '');
-    const mimeType = String(req.body?.mimeType ?? '');
-    const sizeBytes = Number(req.body?.sizeBytes);
+    const fileNameRaw = req.body?.fileName;
+    const mimeTypeRaw = req.body?.mimeType;
+    const sizeBytesRaw = req.body?.sizeBytes;
+
+    if (typeof fileNameRaw !== 'string') {
+      throw new BadRequestException('Invalid fileName');
+    }
+    if (typeof mimeTypeRaw !== 'string') {
+      throw new BadRequestException('Invalid mimeType');
+    }
+
+    const fileName = fileNameRaw;
+    const mimeType = mimeTypeRaw;
+    const sizeBytes = typeof sizeBytesRaw === 'number' ? sizeBytesRaw : Number(sizeBytesRaw);
 
     if (!fileName || fileName.length > 200) {
       throw new BadRequestException('Invalid fileName');

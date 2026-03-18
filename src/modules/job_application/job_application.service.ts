@@ -8,10 +8,14 @@ import { CreateJobApplicationDto } from './dto/create-job_application.dto';
 import { UpdateJobApplicationDto } from './dto/update-job_application.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ApplicationStatus, Role } from '@prisma/client';
+import { EmailProducerService } from '../email/email_producer.service';
 
 @Injectable()
 export class JobApplicationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailProducer: EmailProducerService,
+  ) {}
 
   async apply(dto: CreateJobApplicationDto, applicantId: number) {
     const job = await this.prisma.job.findUnique({
@@ -39,6 +43,14 @@ export class JobApplicationService {
           updatedAt: true,
         },
       });
+
+      const applicant = await this.prisma.user.findUnique({
+        where: { id: applicantId },
+        select: { id: true, email: true, firstname: true, lastname: true },
+      });
+      if (applicant) {
+        void this.emailProducer.sendApplicationEmail(applicant, application.id);
+      }
 
       return {
         message: 'Applied successfully',

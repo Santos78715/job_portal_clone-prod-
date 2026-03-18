@@ -7,6 +7,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { RedisService } from 'src/common/redis/job/cache.service';
 import { EmailModule } from '../email/email.module';
+import { WorkerModule } from 'src/common/worker/worker.module';
 
 @Module({
   imports: [PrismaModule, EmailModule],
@@ -17,6 +18,7 @@ import { EmailModule } from '../email/email.module';
     AuthGuard,
     RoleGuard,
     RedisService,
+    WorkerModule,
   ],
 })
 export class JobApplicationModule {}

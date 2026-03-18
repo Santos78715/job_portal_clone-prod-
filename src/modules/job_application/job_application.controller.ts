@@ -18,14 +18,12 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/admin.decorator';
 import { Role } from '@prisma/client';
 import { UnauthorizedException } from '@nestjs/common';
-import { EmailProducerService } from '../email/email_producer.service';
 
 type RequestWithUser = Request & { user?: { sub?: number; role?: Role } };
 
 @Controller('job-application')
 export class JobApplicationController {
   constructor(
-    private emailProviderService: EmailProducerService,
     private readonly jobApplicationService: JobApplicationService,
   ) {}
 
@@ -38,9 +36,7 @@ export class JobApplicationController {
   ) {
     const userId = req.user?.sub;
     if (!userId) throw new UnauthorizedException('Missing user context');
-    let appliedData = this.jobApplicationService.apply(dto, userId);
-    await this.emailProviderService.sendApplicationEmail(dto);
-    return appliedData;
+    return this.jobApplicationService.apply(dto, userId);
   }
 
   @UseGuards(AuthGuard, RoleGuard)

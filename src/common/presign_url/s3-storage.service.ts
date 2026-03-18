@@ -1,5 +1,4 @@
 import {
-  Bucket,
   CreateBucketCommand,
   PutObjectCommand,
   S3,
@@ -16,7 +15,7 @@ const s3Client = new S3({
 export class AWSS3Service {
   constructor() {}
 
-  async createBucket(bucketName) {
+  async createBucket(bucketName: string): Promise<string> {
     const command = new CreateBucketCommand({ Bucket: bucketName });
     await s3Client.send(command);
     console.log('Bucket created successfully.');

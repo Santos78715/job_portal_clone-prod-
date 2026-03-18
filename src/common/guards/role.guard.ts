@@ -17,8 +17,13 @@ type RequestWithUser = Request & {
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get(ROLES_KEY, context.getHandler());
-    if (!requiredRoles) {
+    const requiredRoles =
+      this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) ?? [];
+
+    if (requiredRoles.length === 0) {
       return true;
     }
 
