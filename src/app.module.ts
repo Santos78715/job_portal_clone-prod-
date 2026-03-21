@@ -8,6 +8,7 @@ import { RedisClientModule } from './common/redis/client/redis_client.module';
 import { JobApplicationModule } from './modules/job_application/job_application.module';
 import { UploadModule } from './common/upload/upload.module';
 import { WorkerModule } from './common/worker/worker.module';
+import { SentryModule } from '@sentry/nestjs/setup';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { WorkerModule } from './common/worker/worker.module';
     JobApplicationModule,
     UploadModule,
     WorkerModule,
+    SentryModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

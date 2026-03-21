@@ -18,12 +18,17 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/admin.decorator';
 import { Role } from '@prisma/client';
 import { UnauthorizedException } from '@nestjs/common';
+import { EmailService } from '../email/email.service';
+import { EmailProducerService } from '../email/email_producer.service';
 
 type RequestWithUser = Request & { user?: { sub?: number; role?: Role } };
 
 @Controller('job-application')
 export class JobApplicationController {
-  constructor(private readonly jobApplicationService: JobApplicationService) {}
+  constructor(
+    private readonly jobApplicationService: JobApplicationService,
+    private emailService: EmailProducerService,
+  ) {}
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.CANDIDATE)
@@ -34,7 +39,17 @@ export class JobApplicationController {
   ) {
     const userId = req.user?.sub;
     if (!userId) throw new UnauthorizedException('Missing user context');
-    return this.jobApplicationService.apply(dto, userId);
+    await this.emailService.sendApplicationEmail(
+      {
+        id: 2342345,
+        email: 'pokhrel@gmail.com',
+        firstname: 'santosh',
+        lastname: 'pokhrel',
+      },
+      23452345,
+    );
+    this.jobApplicationService.apply(dto, userId);
+    throw new Error('My first Sentry error!');
   }
 
   @UseGuards(AuthGuard, RoleGuard)
